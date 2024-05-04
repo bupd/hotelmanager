@@ -11,7 +11,6 @@ import (
 )
 
 const (
-	DBNAME   = "hotelmanager"
 	userColl = "users"
 )
 

@@ -12,8 +12,6 @@ import (
 )
 
 const (
-	dburi    string = "mongodb://localhost:27017"
-	dbname   string = "hotelmanager"
 	userColl string = "users"
 )
 
@@ -25,7 +23,7 @@ var config = fiber.Config{
 }
 
 func main() {
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(dburi))
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(db.DBURI))
 	if err != nil {
 		panic(err)
 	}
@@ -38,12 +36,12 @@ func main() {
 	apiv1 := app.Group("/api/v1")
 	apiv1.Get("/healthz", handleHealthz)
 
-	userHandler := api.NewUserHandler(db.NewMongoUserStore(client, dbname))
+	userHandler := api.NewUserHandler(db.NewMongoUserStore(client, db.DBNAME))
 	apiv1.Get("/user/:id", userHandler.HandleGetUser)
 	apiv1.Delete("/user/:id", userHandler.HandleDelUser)
 	apiv1.Get("/users", userHandler.HandleGetUsers)
 	apiv1.Post("/user", userHandler.HandlePostUser)
-  apiv1.Put("/user/:id", userHandler.HandlePutUser)
+	apiv1.Put("/user/:id", userHandler.HandlePutUser)
 
 	app.Get("/", handleMain)
 	app.Listen(*listenAddr)
