@@ -38,7 +38,7 @@ func main() {
 	apiv1 := app.Group("/api/v1")
 	apiv1.Get("/healthz", handleHealthz)
 
-	userHandler := api.NewUserHandler(db.NewMongoUserStore(client))
+	userHandler := api.NewUserHandler(db.NewMongoUserStore(client, dbname))
 	apiv1.Get("/user/:id", userHandler.HandleGetUser)
 	apiv1.Delete("/user/:id", userHandler.HandleDelUser)
 	apiv1.Get("/users", userHandler.HandleGetUsers)
