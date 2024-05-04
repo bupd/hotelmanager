@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/bupd/hotelmanager/db"
+	"github.com/bupd/hotelmanager/types"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -13,6 +14,34 @@ func NewUserHandler(userStore db.UserStore) *UserHandler {
 	return &UserHandler{
 		userStore: userStore,
 	}
+}
+
+func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
+	// TO-DO createusers with store
+	// basically how all these works is create a route in the main func ()  {
+	// attach a handler to the route which takes the params and set Context
+	// to call the correct method for the route
+	// handler calls the method to update the db
+	var params types.CreateUserParams
+	if err := c.BodyParser(&params); err != nil {
+		return err
+	}
+
+	user, err := types.NewUserFromParams(params)
+	if err != nil {
+		return err
+	}
+
+	if err := params.Validate(); err != nil {
+		return err
+	}
+
+	insertedUser, err := h.userStore.CreateUser(c.Context(), user)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(insertedUser)
 }
 
 func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
