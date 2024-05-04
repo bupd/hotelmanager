@@ -1,9 +1,12 @@
 package api
 
 import (
+	"errors"
+
 	"github.com/bupd/hotelmanager/db"
 	"github.com/bupd/hotelmanager/types"
 	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type UserHandler struct {
@@ -16,8 +19,20 @@ func NewUserHandler(userStore db.UserStore) *UserHandler {
 	}
 }
 
-func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
+func (h *UserHandler) HandlePutUser(c *fiber.Ctx) error {
+	return nil
+}
 
+func (h *UserHandler) HandleDelUser(c *fiber.Ctx) error {
+	userID := c.Params("id")
+	if err := h.userStore.DeleteUser(c.Context(), userID); err != nil {
+		return err
+	}
+
+	return c.JSON(map[string]string{"deleted": userID})
+}
+
+func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
 	// TO-DO createusers with store
 	// basically how all these works is create a route in the main function
 	// attach a handler to the route which takes the params and set Context
@@ -50,6 +65,9 @@ func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
 	id := c.Params("id")
 	user, err := h.userStore.GetUserById(c.Context(), id)
 	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return c.JSON(map[string]string{"msg": "user not found."})
+		}
 		return err
 	}
 
