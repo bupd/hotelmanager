@@ -17,8 +17,9 @@ func NewUserHandler(userStore db.UserStore) *UserHandler {
 }
 
 func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
+
 	// TO-DO createusers with store
-	// basically how all these works is create a route in the main func ()  {
+	// basically how all these works is create a route in the main function
 	// attach a handler to the route which takes the params and set Context
 	// to call the correct method for the route
 	// handler calls the method to update the db
@@ -32,8 +33,9 @@ func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
 		return err
 	}
 
-	if err := params.Validate(); err != nil {
-		return err
+	errors := params.Validate()
+	if len(errors) > 0 {
+		return c.JSON(errors)
 	}
 
 	insertedUser, err := h.userStore.CreateUser(c.Context(), user)

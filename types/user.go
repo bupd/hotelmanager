@@ -22,28 +22,35 @@ type CreateUserParams struct {
 	Password  string `json:"password"`
 }
 
-func (params CreateUserParams) Validate() error {
+func (params CreateUserParams) Validate() map[string]string {
+	errors := map[string]string{}
 	if len(params.FirstName) < minFirstNameLen {
-		return fmt.Errorf(
+		errors["firstName"] = fmt.Sprintf(
 			"firstName length should be at least %d Characters long.",
 			minFirstNameLen,
 		)
 	}
 	if len(params.LastName) < minLastNameLen {
-		return fmt.Errorf("lastName length should be at least %d Characters long.", minLastNameLen)
+		errors["lastName"] = fmt.Sprintf(
+			"lastName length should be at least %d Characters long.",
+			minLastNameLen,
+		)
 	}
 	if len(params.Password) < minPasswordLen {
-		return fmt.Errorf("password length should be at least %d Characters long.", minPasswordLen)
+		errors["password"] = fmt.Sprintf(
+			"password length should be at least %d Characters long.",
+			minPasswordLen,
+		)
 	}
-  if !isEmailValid(params.Email) {
-    return fmt.Errorf("email is not valid")
-  }
-  return nil
+	if !isEmailValid(params.Email) {
+		errors["email"] = fmt.Sprintf("email is not valid")
+	}
+	return errors
 }
 
 func isEmailValid(e string) bool {
-  emailRegex := regexp.MustCompile(`^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$`)
-  return emailRegex.MatchString(e)
+	emailRegex := regexp.MustCompile(`^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$`)
+	return emailRegex.MatchString(e)
 }
 
 type User struct {
