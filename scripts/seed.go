@@ -20,6 +20,7 @@ func main() {
 	}
 
 	hotelStore := db.NewMongoHotelStore(client, db.DBNAME)
+	roomStore := db.NewMongoRoomStore(client, db.DBNAME)
 
 	hotel := types.Hotel{
 		Name:     "Kumarii",
@@ -37,6 +38,13 @@ func main() {
 		log.Fatal(err)
 	}
 
+	room.HotelID = insertedHotel.ID
+	insertedRoom, err := roomStore.InsertRoom(ctx, &room)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	fmt.Println(insertedHotel)
+	fmt.Println(insertedRoom)
 	fmt.Println("seeding the database..")
 }
