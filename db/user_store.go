@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/bupd/hotelmanager/types"
 	"go.mongodb.org/mongo-driver/bson"
@@ -14,7 +15,13 @@ const (
 	userColl = "users"
 )
 
+type Dropper interface {
+	Drop(context.Context) error
+}
+
 type UserStore interface {
+	Dropper
+
 	GetUserById(context.Context, string) (*types.User, error)
 	GetUsers(context.Context) ([]*types.User, error)
 	CreateUser(context.Context, *types.User) (*types.User, error)
@@ -32,6 +39,11 @@ func NewMongoUserStore(c *mongo.Client) *MongoUserStore {
 		client: c,
 		coll:   c.Database(DBNAME).Collection(userColl),
 	}
+}
+
+func (s *MongoUserStore) Drop(ctx context.Context) error {
+	fmt.Println("--- dropping user collection ----")
+	return s.coll.Drop(ctx)
 }
 
 func (s *MongoUserStore) UpdateUser(
