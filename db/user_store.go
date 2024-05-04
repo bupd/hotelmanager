@@ -19,7 +19,7 @@ type UserStore interface {
 	GetUsers(context.Context) ([]*types.User, error)
 	CreateUser(context.Context, *types.User) (*types.User, error)
 	DeleteUser(context.Context, string) error
-	UpdateUser(ctx context.Context,filter bson.E, update bson.M) error
+	UpdateUser(ctx context.Context, filter bson.M, params types.UpdateUserParams) error
 }
 
 type MongoUserStore struct {
@@ -34,13 +34,20 @@ func NewMongoUserStore(c *mongo.Client) *MongoUserStore {
 	}
 }
 
-func (s *MongoUserStore) UpdateUser(ctx context.Context, filter bson.M, values bson.E) error {
-  update:= bson.D{
-    {
-      "$set", bson.D{values},
-    },
-  } 
-  _, err := s.coll.UpdateOne(ctx, filter, update)
+func (s *MongoUserStore) UpdateUser(
+	ctx context.Context,
+	filter bson.M,
+	params types.UpdateUserParams,
+) error {
+  values := params.ToBson()
+	// Construct the update document
+	update := bson.D{{"$set", values}}
+
+	// Perform the update operation
+	_, err := s.coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -50,11 +57,11 @@ func (s *MongoUserStore) DeleteUser(ctx context.Context, userID string) error {
 		return err
 	}
 
-  // If you want check this later 
+	// If you want check this later
 	_, err = s.coll.DeleteOne(ctx, bson.M{"_id": oid})
-  if err != nil {
-    return err
-  }
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
