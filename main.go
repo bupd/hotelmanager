@@ -40,7 +40,7 @@ func main() {
 
 	userHandler := api.NewUserHandler(db.NewMongoUserStore(client))
 	apiv1.Get("/user/:id", userHandler.HandleGetUser)
-	apiv1.Get("/users", api.HandleGetUsers)
+	apiv1.Get("/users", userHandler.HandleGetUsers)
 
 	app.Get("/", handleMain)
 	app.Listen(*listenAddr)
