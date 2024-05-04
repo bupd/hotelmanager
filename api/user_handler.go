@@ -2,10 +2,13 @@ package api
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/bupd/hotelmanager/db"
 	"github.com/bupd/hotelmanager/types"
 	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -20,6 +23,28 @@ func NewUserHandler(userStore db.UserStore) *UserHandler {
 }
 
 func (h *UserHandler) HandlePutUser(c *fiber.Ctx) error {
+  var (
+    values bson.E
+    userID = c.Params("id")
+  )
+  oid, err := primitive.ObjectIDFromHex(userID)
+  if err != nil {
+    return err
+  }
+  if err:= c.BodyParser(&values); err != nil {
+    return err
+  }
+
+  fmt.Println(values)
+  filter:= bson.M{"_id": oid}
+  if err := h.userStore.UpdateUser(c.Context(), filter, values); err != nil {
+    return err
+  }
+  if err != nil {
+
+  }
+
+
 	return nil
 }
 
