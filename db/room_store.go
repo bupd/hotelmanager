@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/bupd/hotelmanager/types"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -15,6 +16,8 @@ type RoomStore interface {
 type MongoRoomStore struct {
 	client *mongo.Client
 	coll   *mongo.Collection
+
+  HotelStore
 }
 
 func NewMongoRoomStore(client *mongo.Client, dbname string) *MongoRoomStore {
@@ -34,6 +37,14 @@ func (s *MongoRoomStore) InsertRoom(
 	}
 
 	room.ID = resp.InsertedID.(primitive.ObjectID)
+
+	// Also update in the hotel
+	filter := bson.M{
+		"_id": room.HotelID,
+	}
+	update := bson.M{
+		"$push": bson.M{"rooms": room.ID},
+	}
 
 	return room, nil
 }
