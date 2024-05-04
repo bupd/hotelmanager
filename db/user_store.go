@@ -39,7 +39,10 @@ func (s *MongoUserStore) UpdateUser(
 	filter bson.M,
 	params types.UpdateUserParams,
 ) error {
-  values := params.ToBson()
+	if err := params.Validate(); err != nil {
+		return err
+	}
+	values := params.ToBson()
 	// Construct the update document
 	update := bson.D{{"$set", values}}
 

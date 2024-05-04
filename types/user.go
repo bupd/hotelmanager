@@ -41,6 +41,26 @@ type CreateUserParams struct {
 	Password  string `json:"password"`
 }
 
+func (params UpdateUserParams) Validate() error {
+	if len(params.FirstName) > 0 {
+		if len(params.FirstName) < minFirstNameLen {
+			return fmt.Errorf(
+				"firstName length should be at least %d Characters long.",
+				minFirstNameLen,
+			)
+		}
+	}
+	if len(params.LastName) > 0 {
+		if len(params.LastName) < minLastNameLen {
+			return fmt.Errorf(
+				"lastName length should be at least %d Characters long.",
+				minLastNameLen,
+			)
+		}
+	}
+	return nil
+}
+
 func (params CreateUserParams) Validate() map[string]string {
 	errors := map[string]string{}
 	if len(params.FirstName) < minFirstNameLen {
