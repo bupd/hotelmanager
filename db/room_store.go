@@ -17,13 +17,18 @@ type MongoRoomStore struct {
 	client *mongo.Client
 	coll   *mongo.Collection
 
-  HotelStore
+	HotelStore
 }
 
-func NewMongoRoomStore(client *mongo.Client, dbname string) *MongoRoomStore {
+func NewMongoRoomStore(
+	client *mongo.Client,
+	dbname string,
+	hotelStore HotelStore,
+) *MongoRoomStore {
 	return &MongoRoomStore{
-		client: client,
-		coll:   client.Database(dbname).Collection("rooms"),
+		client:     client,
+		coll:       client.Database(dbname).Collection("rooms"),
+		HotelStore: hotelStore,
 	}
 }
 
@@ -45,6 +50,12 @@ func (s *MongoRoomStore) InsertRoom(
 	update := bson.M{
 		"$push": bson.M{"rooms": room.ID},
 	}
+
+	if err := s.HotelStore.Update(ctx, filter, update); err != nil {
+		return nil, err
+	}
+
+	_, _ = filter, update
 
 	return room, nil
 }
