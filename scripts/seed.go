@@ -12,30 +12,27 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func main() {
-	ctx := context.Background()
+var (
+	client     *mongo.Client
+	roomStore  db.RoomStore
+	hotelStore db.HotelStore
+	ctx        = context.Background()
+)
 
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(db.DBURI))
-	if err != nil {
-		panic(err)
-	}
-
-	if err := client.Database(db.DBNAME).Drop(ctx); err != nil {
-		log.Fatal("the db is dropping..")
-	}
-
-	hotelStore := db.NewMongoHotelStore(client, db.DBNAME)
-	roomStore := db.NewMongoRoomStore(client, db.DBNAME, hotelStore)
-
+func seedHotel(name, location string) error {
 	hotel := types.Hotel{
-		Name:     "Kumarii",
-		Location: "Singhii",
+		Name:     name,
+		Location: location,
 		Rooms:    []primitive.ObjectID{},
 	}
 	rooms := []types.Room{
 		{
-			Type:      types.SingleRoomType,
-			BasePrice: 99.9,
+			Type:      types.DoubleRoomType,
+			BasePrice: 299.9,
+		},
+		{
+			Type:      types.SeaSideRoomType,
+			BasePrice: 199.9,
 		},
 		{
 			Type:      types.SingleRoomType,
@@ -61,4 +58,26 @@ func main() {
 	}
 
 	fmt.Println("seeding the database..")
+	return nil
+}
+
+func Init() {
+	var err error
+	client, err = mongo.Connect(context.TODO(), options.Client().ApplyURI(db.DBURI))
+	if err != nil {
+		panic(err)
+	}
+
+	if err := client.Database(db.DBNAME).Drop(ctx); err != nil {
+		log.Fatal("the db is dropping..")
+	}
+
+	hotelStore = db.NewMongoHotelStore(client, db.DBNAME)
+	roomStore = db.NewMongoRoomStore(client, db.DBNAME, hotelStore)
+}
+
+func main() {
+	Init()
+	seedHotel("Power", "Beggar")
+	seedHotel("PuliPaandi", "India")
 }
